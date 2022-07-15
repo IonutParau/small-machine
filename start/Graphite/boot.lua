@@ -19,6 +19,7 @@ NewCallback("love2d-draw")
 ToggleShell()
 
 if love then
+    love.graphics.setDefaultFilter("nearest", "nearest")
     require("start.Graphite.components.Low")
     require("start.Graphite.components.Navigator")
     require("start.Graphite.components.Button")
@@ -68,17 +69,23 @@ Graphite.Camera = {
 
 Graphite.Title = "ModularCM (Graphite)"
 Graphite.Icon = "logo.png"
+Graphite.GameName = "ModularCM"
 
-local standardBackBtn = Button:new(40, 40, 50, 50, function() Graphite.MainNavigator:navigate("main") end, "start/Graphite/images/back.png", "topleft", "Back", "Back to the main menu", function() return true end, Graphite.StandardTheme)
+local standardBackBtn = Button:new(40, 40, 50, 50, function() Graphite.MainNavigator:navigate("main") end,
+    "start/Graphite/images/back.png", "topleft", "Back", "Back to the main menu", function() return true end,
+    Graphite.StandardTheme)
 
 Graphite.MainNavigator = Navigator:new({
     main = {
-        Button:new(-50, 0, 50, 50, function() Graphite.MainNavigator:navigate("play_finite") end, "start/Graphite/images/mover.png", "center", "Play Finite Mode", "Sends you to a grid size selector", function() return true end, Graphite.StandardTheme),
+        Button:new(-50, 0, 50, 50, function() Graphite.MainNavigator:navigate("play_finite") end,
+            "start/Graphite/images/mover.png", "center", "Play Finite Mode", "Sends you to a grid size selector",
+            function() return true end, Graphite.StandardTheme),
         Button:new(50, 0, 50, 50, function()
             Grid = DynamicGrid()
             InitialGrid = Grid:copy()
             Graphite.MainNavigator:navigate("game")
-        end, "start/Graphite/images/push.png", "center", "Play Infinite Mode", "Sends you to a infinite grid", function() return true end, Graphite.StandardTheme)
+        end, "start/Graphite/images/push.png", "center", "Play Infinite Mode", "Sends you to a infinite grid",
+            function() return true end, Graphite.StandardTheme)
     },
     play_finite = {
         standardBackBtn,
@@ -100,7 +107,7 @@ function Graphite.SetCellEnvironment(newEnvironment)
 end
 
 -- Boot
-for i=1,#ModularCM.packages do
+for i = 1, #ModularCM.packages do
     Depend(ModularCM.packages[i])
 end
 
@@ -109,7 +116,7 @@ end
 function love.load()
     love.window.setIcon(type(Graphite.Icon) == "string" and love.image.newImageData(Graphite.Icon) or Graphite.Icon)
     love.window.setTitle(Graphite.Title)
-    love.window.setMode(800, 600, {resizable = true})
+    love.window.setMode(800, 600, { resizable = true })
     RunQueue("love2d-init")
     environment:init()
 end
@@ -120,11 +127,27 @@ function love.draw()
     love.graphics.rectangle("fill", 1, 1, love.graphics.getWidth(), love.graphics.getHeight())
     love.graphics.setColor(1, 1, 1, 1)
     if Graphite.MainNavigator.route == "game" then
-       environment:draw()
+        environment:draw()
+    end
+    if Graphite.MainNavigator.route == "main" then
+        love.graphics.setColor(1, 1, 1, 1)
+        local font = love.graphics.getFont()
+        local textWidth = font:getWidth(Graphite.GameName) * 2
+        love.graphics.printf(Graphite.GameName, love.graphics.getWidth() / 2 - textWidth / 2,
+            love.graphics.getHeight() / 2 - 200, love.graphics.getWidth(), "left"
+            ,
+            0, 2, 2)
+        local img = TextureManager:Load(Graphite.Icon)
+
+        love.graphics.setColor(1, 1, 1, 0.5)
+        love.graphics.draw(img, love.graphics.getWidth() / 2 - img:getWidth() / 2,
+            love.graphics.getHeight() / 2 - img:getHeight() / 2)
+        love.graphics.setColor(1, 1, 1, 1)
     end
     Graphite.MainNavigator:draw()
     if Graphite.hoveredButton then
-        Graphite.RenderInfoBox(love.mouse.getX(), love.mouse.getY(), Graphite.hoveredButton.title, Graphite.hoveredButton.description, Graphite.hoveredButton.theme)
+        Graphite.RenderInfoBox(love.mouse.getX(), love.mouse.getY(), Graphite.hoveredButton.title,
+            Graphite.hoveredButton.description, Graphite.hoveredButton.theme)
     end
     RunCallback("love2d-draw")
 end

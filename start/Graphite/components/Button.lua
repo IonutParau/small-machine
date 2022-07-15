@@ -10,6 +10,7 @@
 ---@field description string
 ---@field enabled function
 ---@field theme Graphite.Theme
+---@field rotation number
 Button = {}
 Button.__index = Button
 
@@ -42,6 +43,7 @@ function Button:new(x, y, width, height, callback, image, align, title, descript
         description = description,
         enabled = enabled,
         theme = theme,
+        rotation = 0,
     }, self)
 end
 
@@ -66,7 +68,7 @@ function Button:draw()
     if not size then return end
     if not self:isHovered(love.mouse.getX(), love.mouse.getY()) then love.graphics.setColor(1, 1, 1, 0.5) end
 
-    love.graphics.draw(img, x, y, 0, self.width / size.w, self.height / size.h, size.w2, size.h2)
+    love.graphics.draw(img, x, y, self.rotation, self.width / size.w, self.height / size.h, size.w2, size.h2)
     love.graphics.setColor(1, 1, 1, 1)
 
     if self:isHovered(love.mouse.getX(), love.mouse.getY()) then
