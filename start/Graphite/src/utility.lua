@@ -8,14 +8,14 @@ function Graphite.ParseAlignment(x, y, alignment)
     local w, h = love.graphics.getDimensions()
 
     if alignment == "topleft" then return x, y end
-    if alignment == "topcenter" then return x+w/2, y end
-    if alignment == "topright" then return w-x, y end
-    if alignment == "centerleft" then return x, y+h/2 end
-    if alignment == "center" then return x+w/2, y+h/2 end
-    if alignment == "centerright" then return w-x, y+h/2 end
-    if alignment == "bottomleft" then return x, h-y end
-    if alignment == "bottomcenter" then return x+w/2, h-y end
-    if alignment == "bottomright" then return w-x, h-y end
+    if alignment == "topcenter" then return x + w / 2, y end
+    if alignment == "topright" then return w - x, y end
+    if alignment == "centerleft" then return x, y + h / 2 end
+    if alignment == "center" then return x + w / 2, y + h / 2 end
+    if alignment == "centerright" then return w - x, y + h / 2 end
+    if alignment == "bottomleft" then return x, h - y end
+    if alignment == "bottomcenter" then return x + w / 2, h - y end
+    if alignment == "bottomright" then return w - x, h - y end
 end
 
 ---@param x number
@@ -31,29 +31,29 @@ function Graphite.RenderInfoBox(x, y, title, description, theme)
     local charHeight = font:getHeight() * theme.normalFontSize
 
     local maxCharCount = math.max(math.min(#title, #description), 14)
-    
+
     local titleFraction = 1.2
 
-    local titleWidth = maxCharCount*charWidth*titleFraction
-    
-    local descHeight = charHeight * (math.ceil(font:getWidth(description) / titleWidth)+0.5) * theme.normalFontSize
+    local titleWidth = maxCharCount * charWidth * titleFraction
+
+    local descHeight = charHeight * (math.ceil(font:getWidth(description) / titleWidth) + 0.5) * theme.normalFontSize
 
     local boxWidth = titleWidth
-    local boxHeight = charHeight*titleFraction+descHeight+20
-    
+    local boxHeight = charHeight * titleFraction + descHeight + 20
+
     local margin = 10
 
-    x = math.min(x, love.graphics.getWidth()-boxWidth-margin*2)
-    y = math.min(y, love.graphics.getHeight()-boxHeight-margin*2)
+    x = math.min(x, love.graphics.getWidth() - boxWidth - margin * 2)
+    y = math.min(y, love.graphics.getHeight() - boxHeight - margin * 2)
 
-    local borderX = x-theme.borderThickness/2-margin
-    local borderY = y-theme.borderThickness/2-margin
-    local borderEndX = x+boxWidth+theme.borderThickness/2+margin
-    local borderEndY = y+boxHeight+theme.borderThickness/2+margin
-    
+    local borderX = x - theme.borderThickness / 2 - margin
+    local borderY = y - theme.borderThickness / 2 - margin
+    local borderEndX = x + boxWidth + theme.borderThickness / 2 + margin
+    local borderEndY = y + boxHeight + theme.borderThickness / 2 + margin
+
     -- Draw border
-    
-    local borderVert = {borderX, borderY, borderEndX, borderY, borderEndX, borderEndY, borderX, borderEndY}
+
+    local borderVert = { borderX, borderY, borderEndX, borderY, borderEndX, borderEndY, borderX, borderEndY }
     theme.borderColor:apply()
     love.graphics.setLineWidth(theme.borderThickness)
     love.graphics.polygon("line", borderVert)
@@ -61,12 +61,13 @@ function Graphite.RenderInfoBox(x, y, title, description, theme)
 
     -- Draw normal background
     theme.normalBgColor:apply()
-    love.graphics.rectangle("fill", x-margin, y-margin, boxWidth+margin*2, boxHeight+margin*2)
-    
+    love.graphics.rectangle("fill", x - margin, y - margin, boxWidth + margin * 2, boxHeight + margin * 2)
+
     -- Draw text
     theme.normalColor:apply()
-    love.graphics.print(title, x, y, 0, theme.normalFontSize*titleFraction, theme.normalFontSize*titleFraction)
-    love.graphics.printf(description, x, y+charHeight+20, boxWidth/theme.normalFontSize, nil, 0, theme.normalFontSize, theme.normalFontSize)
+    love.graphics.print(title, x, y, 0, theme.normalFontSize * titleFraction, theme.normalFontSize * titleFraction)
+    love.graphics.printf(description, x, y + charHeight + 20, boxWidth / theme.normalFontSize, nil, 0,
+        theme.normalFontSize, theme.normalFontSize)
 
     -- Reset
     love.graphics.setColor(1, 1, 1, 1)
@@ -121,24 +122,28 @@ end
 ---@param y number
 ---@return number, number
 function Graphite.CellToScreen(x, y)
-    local offX, offY = love.graphics.getWidth()/2, love.graphics.getHeight()/2
+    local offX, offY = love.graphics.getWidth() / 2, love.graphics.getHeight() / 2
 
-    return (x * Graphite.Camera.zoom * Graphite.Camera.cellSize + offX + Graphite.Camera.x), (y * Graphite.Camera.zoom * Graphite.Camera.cellSize + offY + Graphite.Camera.y)
+    return (x * Graphite.Camera.zoom * Graphite.Camera.cellSize + offX + Graphite.Camera.x),
+        (y * Graphite.Camera.zoom * Graphite.Camera.cellSize + offY + Graphite.Camera.y)
 end
 
 ---@param x number
 ---@param y number
 ---@return number, number
 function Graphite.ScreenToCell(x, y)
-    local offX, offY = love.graphics.getWidth()/2, love.graphics.getHeight()/2
+    local offX, offY = love.graphics.getWidth() / 2, love.graphics.getHeight() / 2
 
     local dx, dy = x - offX, y - offY
 
-    dx = dx - Graphite.Camera.x + Graphite.Camera.cellSize/2
-    dy = dy - Graphite.Camera.y + Graphite.Camera.cellSize/2
+    dx = dx - Graphite.Camera.x
+    dy = dy - Graphite.Camera.y
 
     dx = dx / Graphite.Camera.zoom / Graphite.Camera.cellSize
     dy = dy / Graphite.Camera.zoom / Graphite.Camera.cellSize
+
+    dx = dx + 0.5
+    dy = dy + 0.5
 
     return math.floor(dx), math.floor(dy)
 end
@@ -156,7 +161,9 @@ function Graphite.DrawBackground(x, y, cell)
     py = py
     local renderInfo = Graphite.GetRenderData(cell.id)
     local img = TextureManager:Load(renderInfo.texture)
-    love.graphics.draw(img, px, py, cell.rot * math.pi/2, Graphite.Camera.cellSize/img:getWidth()*Graphite.Camera.zoom, Graphite.Camera.cellSize/img:getHeight()*Graphite.Camera.zoom, img:getWidth()/2, img:getHeight()/2)
+    love.graphics.draw(img, px, py, cell.rot * math.pi / 2, Graphite.Camera.cellSize / img:getWidth() *
+        Graphite.Camera.zoom, Graphite.Camera.cellSize / img:getHeight() * Graphite.Camera.zoom, img:getWidth() / 2,
+        img:getHeight() / 2)
 
     RunCallback("post-back-render", x, y, cell)
 end
@@ -174,7 +181,9 @@ function Graphite.DrawCell(x, y, cell)
     py = py
     local renderInfo = Graphite.GetRenderData(cell.id)
     local img = TextureManager:Load(renderInfo.texture)
-    love.graphics.draw(img, px, py, cell.rot * math.pi/2, Graphite.Camera.cellSize/img:getWidth()*Graphite.Camera.zoom, Graphite.Camera.cellSize/img:getHeight()*Graphite.Camera.zoom, img:getWidth()/2, img:getHeight()/2)
+    love.graphics.draw(img, px, py, cell.rot * math.pi / 2, Graphite.Camera.cellSize / img:getWidth() *
+        Graphite.Camera.zoom, Graphite.Camera.cellSize / img:getHeight() * Graphite.Camera.zoom, img:getWidth() / 2,
+        img:getHeight() / 2)
 
     RunCallback("post-cell-render", x, y, cell)
 end
