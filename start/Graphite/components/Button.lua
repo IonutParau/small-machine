@@ -29,7 +29,7 @@ Graphite.hoveredButton = nil
 ---@param theme Graphite.Theme
 function Button:new(x, y, width, height, callback, image, align, title, description, enabled, theme)
     TextureManager:Cache(image, image)
-    
+
     return setmetatable({
         x = x,
         y = y,
@@ -48,23 +48,25 @@ end
 function Button:isHovered(x, y)
     local px, py = Graphite.ParseAlignment(self.x, self.y, self.align)
 
-    
-    local w, h = self.width, self.height
-    
-    px = px - w/2
-    py = py - h/2
 
-    if x >= px and x <= px+self.width and y >= py and y <= py+self.height then return true else return false end
+    local w, h = self.width, self.height
+
+    px = px - w / 2
+    py = py - h / 2
+
+    if x >= px and x <= px + self.width and y >= py and y <= py + self.height then return true else return false end
 end
 
 function Button:draw()
     if not self.enabled() then return end
-    
+
     local x, y = Graphite.ParseAlignment(self.x, self.y, self.align)
     local img, size = TextureManager:ImageFromCache(self.image), TextureManager:SizeFromCache(self.image)
+    if not img then return end
+    if not size then return end
     if not self:isHovered(love.mouse.getX(), love.mouse.getY()) then love.graphics.setColor(1, 1, 1, 0.5) end
 
-    love.graphics.draw(img, x, y, 0, self.width/size.w, self.height/size.h, size.w2, size.h2)
+    love.graphics.draw(img, x, y, 0, self.width / size.w, self.height / size.h, size.w2, size.h2)
     love.graphics.setColor(1, 1, 1, 1)
 
     if self:isHovered(love.mouse.getX(), love.mouse.getY()) then
